@@ -1,7 +1,7 @@
 import { Moon, Sun, Monitor } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useThemeStore } from '../../stores';
-import type { Theme } from '../../stores/themeStore';
+type Theme = 'light' | 'dark' | 'system';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useThemeStore();

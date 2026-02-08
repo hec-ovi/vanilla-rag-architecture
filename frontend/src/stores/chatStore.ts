@@ -5,7 +5,7 @@ interface ChatState {
   messages: ChatMessage[];
   isLoading: boolean;
   uploads: UploadProgress[];
-  addMessage: (message: Omit<ChatMessage, 'id' | 'timestamp'>) => void;
+  addMessage: (message: Omit<ChatMessage, 'id' | 'timestamp'>) => string;
   updateMessage: (id: string, updates: Partial<ChatMessage>) => void;
   appendToMessage: (id: string, content: string) => void;
   clearMessages: () => void;
@@ -18,21 +18,22 @@ interface ChatState {
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
 
-export const useChatStore = create<ChatState>((set, get) => ({
+export const useChatStore = create<ChatState>((set, _get) => ({
   messages: [],
   isLoading: false,
   uploads: [],
   
   addMessage: (message) => {
+    const id = generateId();
     const newMessage: ChatMessage = {
       ...message,
-      id: generateId(),
+      id,
       timestamp: new Date(),
     };
     set((state) => ({
       messages: [...state.messages, newMessage],
     }));
-    return newMessage.id;
+    return id;
   },
   
   updateMessage: (id, updates) => {

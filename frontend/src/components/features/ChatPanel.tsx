@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, BookOpen, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
-import { Card, CardContent } from '../ui/Card';
+import { Card } from '../ui/Card';
 import { TextArea } from '../ui/TextArea';
 import { Spinner } from '../ui/Spinner';
 import { cn, formatTime } from '../../lib/utils';
@@ -33,11 +33,13 @@ export function ChatPanel() {
     });
 
     // Add placeholder for assistant
-    const assistantId = addMessage({
+    const assistantMsgId = addMessage({
       role: 'assistant',
       content: '',
       isStreaming: true,
     });
+    const assistantId = assistantMsgId || '';
+    if (!assistantId) return;
 
     setLoading(true);
 

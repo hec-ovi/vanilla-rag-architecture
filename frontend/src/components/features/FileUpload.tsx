@@ -1,10 +1,9 @@
 import { useCallback, useState } from 'react';
 import { Upload, X, FileText, Image as ImageIcon, File } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { StatusBadge } from '../ui/StatusBadge';
-import { cn, formatFileSize } from '../../lib/utils';
+import { cn } from '../../lib/utils';
 import { useChatStore } from '../../stores';
 import { ragService } from '../../services';
 

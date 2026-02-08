@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { StatusBadge } from '../ui/StatusBadge';
-import { Spinner } from '../ui/Spinner';
+// import { Spinner } from '../ui/Spinner';
 import { ragService } from '../../services';
 
 export function SettingsPanel() {
