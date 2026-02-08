@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, BookOpen, Trash2 } from 'lucide-react';
+import { Send, Bot, User, BookOpen, Trash2, MessageSquarePlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
@@ -12,6 +12,7 @@ import type { ChatMessage, Source } from '../../types';
 
 export function ChatPanel() {
   const [input, setInput] = useState('');
+  const [conversationId, setConversationId] = useState<string | undefined>();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { messages, isLoading, addMessage, updateMessage, setLoading, clearMessages } = useChatStore();
 
@@ -44,7 +45,10 @@ export function ChatPanel() {
     setLoading(true);
 
     try {
-      const response = await ragService.query({ query: userMessage });
+      const response = await ragService.chat(userMessage, conversationId);
+      
+      // Save conversation ID for follow-up
+      setConversationId(response.conversation_id);
       
       updateMessage(assistantId, {
         content: response.answer,
@@ -68,6 +72,11 @@ export function ChatPanel() {
     }
   };
 
+  const handleNewChat = () => {
+    clearMessages();
+    setConversationId(undefined);
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Messages Area */}
@@ -79,9 +88,13 @@ export function ChatPanel() {
               Welcome to Vanilla RAG
             </h3>
             <p className="max-w-sm">
-              Upload documents and ask questions. I'll retrieve relevant information 
-              and answer based on your knowledge base.
+              Upload documents and ask questions. I remember our conversation!
             </p>
+            {conversationId && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Conversation ID: {conversationId.slice(0, 8)}...
+              </p>
+            )}
           </div>
         )}
 
@@ -107,6 +120,14 @@ export function ChatPanel() {
 
       {/* Input Area */}
       <div className="p-4 border-t border-border bg-card">
+        {conversationId && (
+          <div className="flex items-center gap-2 mb-2 px-1">
+            <span className="text-xs text-muted-foreground">
+              Conversation: {conversationId.slice(0, 8)}...
+            </span>
+          </div>
+        )}
+        
         <div className="flex gap-2">
           <TextArea
             value={input}
@@ -133,17 +154,30 @@ export function ChatPanel() {
             Press Enter to send, Shift+Enter for new line
           </p>
           
-          {messages.length > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearMessages}
-              className="text-muted-foreground hover:text-destructive"
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              Clear chat
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {messages.length > 0 && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleNewChat}
+                  className="text-muted-foreground"
+                >
+                  <MessageSquarePlus className="h-4 w-4 mr-1" />
+                  New chat
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearMessages}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Clear
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
