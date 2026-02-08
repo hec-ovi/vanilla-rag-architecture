@@ -6,6 +6,7 @@ from pathlib import Path
 import structlog
 
 from src.core import RAGError, Settings
+from src.models.chat import ChatQueryRequest, ChatQueryResponse
 from src.models.document import DocumentUpload
 from src.models.rag import IngestResponse, QueryRequest, QueryResponse, Source
 from src.tools import (
@@ -16,6 +17,7 @@ from src.tools import (
     VectorStoreTool,
 )
 
+from .conversation_service import ConversationService
 from .document_service import DocumentService
 
 logger = structlog.get_logger()
@@ -32,6 +34,7 @@ class RAGService:
         """
         self._settings = settings or Settings()
         self._document_service = DocumentService(self._settings)
+        self._conversation_service = ConversationService(self._settings)
         self._embedding_tool = EmbeddingTool(self._settings)
         self._reranker_tool = RerankerTool(self._settings)
         self._text_splitter = TextSplitterTool(self._settings)
@@ -133,7 +136,7 @@ class RAGService:
             )
 
     async def query(self, request: QueryRequest) -> QueryResponse:
-        """Query the RAG system.
+        """Query the RAG system (stateless, no memory).
 
         Args:
             request: Query request with question.
@@ -223,6 +226,124 @@ class RAGService:
             query=request.query,
             model=self._settings.ollama_model,
             tokens_used=None,  # Ollama doesn't always return this
+        )
+
+    async def chat(self, request: ChatQueryRequest) -> ChatQueryResponse:
+        """Chat with the RAG system with conversation memory.
+
+        Args:
+            request: Chat query request with optional conversation_id.
+
+        Returns:
+            Chat response with conversation_id for follow-up.
+        """
+        await self._ensure_initialized()
+
+        # Get or create conversation
+        conversation = self._conversation_service.get_or_create_conversation(
+            request.conversation_id
+        )
+        conv_id = conversation.conversation_id
+
+        logger.info(
+            "processing_chat",
+            query=request.query,
+            conversation_id=conv_id,
+            history_length=len(conversation.messages),
+        )
+
+        # Add user message to conversation
+        self._conversation_service.add_message(conv_id, "user", request.query)
+
+        # 1. Embed query
+        query_embedding = await self._embedding_tool.embed_query(request.query)
+
+        # 2. Retrieve documents
+        retrieve_k = self._settings.top_k_retrieve
+        initial_results = await self._vector_store.search(query_embedding, retrieve_k)
+
+        if not initial_results:
+            # No documents found - respond without context
+            answer = "I don't have enough information to answer this question based on the provided documents."
+            self._conversation_service.add_message(conv_id, "assistant", answer)
+
+            return ChatQueryResponse(
+                answer=answer,
+                sources=[],
+                query=request.query,
+                conversation_id=conv_id,
+                model=self._settings.ollama_model,
+            )
+
+        # 3. Rerank
+        documents = [r["text"] for r in initial_results]
+        rerank_k = request.top_k or self._settings.top_k_rerank
+        reranked = await self._reranker_tool.rerank(
+            request.query,
+            documents,
+            top_k=rerank_k,
+        )
+
+        # 4. Select results
+        selected_indices = [idx for idx, _ in reranked]
+        selected_results = [initial_results[idx] for idx in selected_indices]
+
+        # 5. Build context with conversation history
+        context_parts = []
+
+        # Add conversation history if available
+        if len(conversation.messages) > 1:
+            history_text = conversation.get_history_text(max_messages=6)
+            context_parts.append(f"Previous Conversation:\n{history_text}")
+
+        # Add retrieved documents
+        for i, result in enumerate(selected_results, 1):
+            context_parts.append(f"Document {i}:\n{result['text']}")
+
+        context = "\n\n".join(context_parts)
+
+        # 6. Generate answer
+        try:
+            answer = await self._ollama_tool.generate(
+                prompt=request.query,
+                context=context,
+                stream=False,
+            )
+        except Exception as e:
+            logger.error("chat_generation_failed", error=str(e))
+            raise RAGError(f"Failed to generate answer: {e}") from e
+
+        # 7. Save assistant response
+        self._conversation_service.add_message(conv_id, "assistant", answer)
+
+        # 8. Build sources
+        sources = [
+            Source(
+                chunk_id=result["id"],
+                doc_id=result["metadata"].get("doc_id", "unknown"),
+                filename=result["metadata"].get("filename", "unknown"),
+                content=result["text"][:500] + "..." if len(result["text"]) > 500 else result["text"],
+                score=float(score),
+                index=i,
+            )
+            for i, (idx, score) in enumerate(reranked, 1)
+            for result in [initial_results[idx]]
+        ]
+
+        logger.info(
+            "chat_completed",
+            query=request.query,
+            conversation_id=conv_id,
+            sources=len(sources),
+            answer_length=len(answer),
+        )
+
+        return ChatQueryResponse(
+            answer=answer,
+            sources=sources,
+            query=request.query,
+            conversation_id=conv_id,
+            model=self._settings.ollama_model,
         )
 
     async def reset_index(self) -> dict:

@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from src.core import RAGError, get_settings
-from src.routes import health_router, rag_router
+from src.routes import chat_router, health_router, rag_router
 
 logger = structlog.get_logger()
 
@@ -161,6 +161,7 @@ app.add_middleware(
 # Include routers
 app.include_router(health_router)
 app.include_router(rag_router)
+app.include_router(chat_router)
 
 
 @app.get("/", status_code=status.HTTP_200_OK)
