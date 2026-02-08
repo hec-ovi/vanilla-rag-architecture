@@ -26,7 +26,7 @@ services:
     ports:
       - "${OLLAMA_PORT:-11434}:11434"
     volumes:
-      - ${OLLAMA_MODELS_DIR}:/ollama-models
+      - ${OLLAMA_MODELS_DIR:-/tmp/ollama-models}:/ollama-models
     environment:
       - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen2.5:14b}
       - OLLAMA_MODELS=/ollama-models
@@ -63,8 +63,8 @@ services:
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
-      - ${DATA_DIR}:/app/data
-      - ${OLLAMA_MODELS_DIR}:/ollama-models:ro
+      - ${DATA_DIR:-/tmp/vanilla-rag-data}:/app/data
+      - ${OLLAMA_MODELS_DIR:-/tmp/ollama-models}:/ollama-models:ro
     environment:
       - ENVIRONMENT=production
       - LOG_LEVEL=${LOG_LEVEL:-info}
