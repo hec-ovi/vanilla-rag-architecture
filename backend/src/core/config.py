@@ -43,6 +43,10 @@ class Settings(BaseSettings):
         default="llava:7b",
         description="Vision model for image captioning",
     )
+    ollama_context_length: int = Field(
+        default=8192,
+        description="Context window size in tokens",
+    )
 
     # Vector Database
     vector_db_type: Literal["faiss", "chroma"] = Field(
