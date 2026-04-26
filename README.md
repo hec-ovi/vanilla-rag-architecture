@@ -1,8 +1,25 @@
-# 🚀 Vanilla RAG Architecture
+<h1 align="center">vanilla-rag-architecture</h1>
 
-A production-ready, local-first **Retrieval-Augmented Generation (RAG)** system that delivers state-of-the-art retrieval accuracy through semantic reranking. Built for developers who want AI-assisted workflows without cloud dependencies.
+<p align="center">
+  <strong>Local-first RAG with cross-encoder reranking. FAISS or Chroma vector store, top-10 retrieve then top-3 rerank, multimodal ingestion, Ollama LLM on AMD ROCm.</strong>
+</p>
 
-> **The Breakthrough**: Simple vector retrieval fused with cross-encoder reranking, the "secret sauce" that transforms basic RAG into a precision knowledge engine.
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Working-brightgreen" alt="Status" />
+  <img src="https://img.shields.io/badge/FAISS-Vector_DB-336791" alt="FAISS" />
+  <img src="https://img.shields.io/badge/Cross--Encoder-Reranker-9B59B6" alt="Cross-encoder" />
+  <img src="https://img.shields.io/badge/Ollama-111111?logo=ollama&logoColor=white" alt="Ollama" />
+  <img src="https://img.shields.io/badge/AMD-ROCm-ED1C24?logo=amd&logoColor=white" alt="ROCm" />
+  <img src="https://img.shields.io/badge/License-MIT-blue" alt="License" />
+</p>
+
+---
+
+## What this is
+
+A local-first **Retrieval-Augmented Generation (RAG)** system that delivers high retrieval accuracy through semantic reranking. Vector search returns the top 10 candidates; a cross-encoder reranks them to the top 3 the LLM actually sees. Built for developers who want AI-assisted workflows without cloud dependencies.
+
+> **The breakthrough:** simple vector retrieval fused with cross-encoder reranking. That fusion is what turns basic RAG into a precision knowledge engine.
 
 ## ✨ Features
 
@@ -191,14 +208,6 @@ npm install
 npm run dev
 ```
 
-## 📜 License
+## License
 
-MIT License, build, modify, deploy freely.
-
----
-
-**Built with ❤️ for the local AI revolution.**
-
-*If component chaos is killing your workflow, this is your game-changer.*
-
-#RAG #LocalAI #AMD #ROCm #FastAPI #React
+[MIT](LICENSE) for original code in this repository (FastAPI backend, React frontend, scripts, Compose configs). Third-party components pulled at runtime (Ollama, sentence-transformers, FAISS, Chroma, cross-encoder model weights, vision models) retain their own upstream licenses; this repository does not redistribute them.
