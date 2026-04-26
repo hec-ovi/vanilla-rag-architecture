@@ -2,16 +2,16 @@
 
 A production-ready, local-first **Retrieval-Augmented Generation (RAG)** system that delivers state-of-the-art retrieval accuracy through semantic reranking. Built for developers who want AI-assisted workflows without cloud dependencies.
 
-> **The Breakthrough**: Simple vector retrieval fused with cross-encoder reranking — the "secret sauce" that transforms basic RAG into a precision knowledge engine.
+> **The Breakthrough**: Simple vector retrieval fused with cross-encoder reranking, the "secret sauce" that transforms basic RAG into a precision knowledge engine.
 
 ## ✨ Features
 
 - **🔍 Hybrid Retrieval**: Vector search (top-10) + semantic reranking (top-3) for killer precision
-- **📄 Dynamic Ingestion**: Upload `.txt`, `.pdf`, `.png/.jpg` — processed and vectorized automatically
+- **📄 Dynamic Ingestion**: Upload `.txt`, `.pdf`, `.png/.jpg`, processed and vectorized automatically
 - **🖼️ Multimodal Ready**: Images captioned via vision models, treated as queryable documents
 - **🤖 Local LLM Power**: Ollama integration with ROCm GPU acceleration (AMD Strix Halo optimized)
 - **⚡ Blazing Fast**: Flash Attention + Q8 KV cache quantization for efficient inference
-- **🔒 Privacy-Locked**: 100% local — your data never leaves your machine
+- **🔒 Privacy-Locked**: 100% local, your data never leaves your machine
 - **🎨 Sleek UI**: Vite + React frontend with drag-drop upload and real-time streaming
 
 ## 🏗️ Architecture
@@ -131,8 +131,8 @@ Key environment variables (see `.env.template` for all options):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `OLLAMA_MODELS_DIR` | — | Host path for model storage |
-| `DATA_DIR` | — | Host path for vector DB and uploads |
+| `OLLAMA_MODELS_DIR` | (none) | Host path for model storage |
+| `DATA_DIR` | (none) | Host path for vector DB and uploads |
 | `OLLAMA_MODEL` | `qwen2.5:14b` | LLM model to use |
 | `OLLAMA_CONTEXT_LENGTH` | `8192` | Context window size |
 | `VECTOR_DB_TYPE` | `faiss` | Vector DB: `faiss` or `chroma` |
@@ -171,7 +171,7 @@ The system includes test data to prove the RAG power:
 
 1. Upload `rag_techniques_test.txt` (auto-generated on first run)
 2. Ask obscure questions like: *"What is HyPE vs HyDE in RAG?"*
-3. Watch as the system retrieves and answers from context — something base LLMs can't do
+3. Watch as the system retrieves and answers from context, something base LLMs can't do
 
 ## 🛠️ Development
 
@@ -193,7 +193,7 @@ npm run dev
 
 ## 📜 License
 
-MIT License — build, modify, deploy freely.
+MIT License, build, modify, deploy freely.
 
 ---
 
